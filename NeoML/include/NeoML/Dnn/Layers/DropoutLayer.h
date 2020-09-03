@@ -17,6 +17,7 @@ limitations under the License.
 
 #include <NeoML/NeoMLDefs.h>
 #include <NeoML/Dnn/Dnn.h>
+#include <NeoML/Dnn/Layers/BaseInPlaceLayer.h>
 
 namespace NeoML {
 
@@ -26,7 +27,7 @@ class NEOML_API CDropoutLayer : public CBaseInPlaceLayer {
 public:
 	explicit CDropoutLayer( IMathEngine& mathEngine );
 
-	virtual void Serialize( CArchive& archive ) override;
+	void Serialize( CArchive& archive ) override;
 
 	// The dropout rate, that is, the probability of setting an input element to zero
 	void SetDropoutRate( float value );
@@ -46,9 +47,9 @@ protected:
 	virtual ~CDropoutLayer() { destroyDropoutDesc(); }
 
 	// CBaseLayer methods
-	virtual void RunOnce() override;
-	virtual void BackwardOnce() override;
-	virtual void OnReshaped() override;
+	void RunOnce() override;
+	void BackwardOnce() override;
+	void OnReshaped() override;
 
 private:
 	CDropoutDesc* desc; // the dropout description

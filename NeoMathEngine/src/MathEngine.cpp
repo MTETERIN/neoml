@@ -23,8 +23,10 @@ limitations under the License.
 #ifdef NEOML_USE_CUDA
 #include <cuda_runtime.h>
 #include <CudaMathEngine.h>
+#include <CudaDevice.h>
 #include <CublasDll.h>
 #include <CusparseDll.h>
+#include <MathEngineCommon.h>
 #endif
 
 #ifdef NEOML_USE_VULKAN
@@ -136,7 +138,13 @@ IMathEngine* CGpuMathEngineManager::CreateMathEngine( int index, size_t memoryLi
 	switch(info[index >= 0 ? index : 0].Type) {
 #ifdef NEOML_USE_CUDA
 	case MET_Cuda:
-		return new CCudaMathEngine( CDllLoader::cusparseDll->GetFunctions(), CDllLoader::cublasDll->GetFunctions(), index >= 0 ? info[index].Id : -1, memoryLimit );
+	{
+		std::unique_ptr<CCudaDevice> device( CaptureCudaDevice( index >= 0 ? info[index].Id : -1, memoryLimit ) );
+		if( device == nullptr ) {
+			return nullptr;
+		}
+		return new CCudaMathEngine( CDllLoader::cusparseDll->GetFunctions(), CDllLoader::cublasDll->GetFunctions(), device );
+	}
 #endif
 #ifdef NEOML_USE_VULKAN
 	case MET_Vulkan:

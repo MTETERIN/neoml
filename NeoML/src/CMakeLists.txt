@@ -26,7 +26,9 @@ target_sources( ${PROJECT_NAME} PRIVATE
     Dnn/Layers/AttentionLayer.cpp
     Dnn/Layers/BackLinkLayer.cpp
     Dnn/Layers/BaseConvLayer.cpp
+    Dnn/Layers/BaseInPlaceLayer.cpp
     Dnn/Layers/BatchNormalizationLayer.cpp
+    Dnn/Layers/AddToObjectLayer.cpp
     Dnn/Layers/BinaryCrossEntropyLayer.cpp
     Dnn/Layers/BinaryFocalLossLayer.cpp
     Dnn/Layers/CenterLossLayer.cpp
@@ -46,6 +48,7 @@ target_sources( ${PROJECT_NAME} PRIVATE
     Dnn/Layers/FocalLossLayer.cpp
     Dnn/Layers/FullyConnectedLayer.cpp
     Dnn/Layers/FullyConnectedSourceLayer.cpp
+    Dnn/Layers/GELULayer.cpp
     Dnn/Layers/GlobalMaxPoolingLayer.cpp
     Dnn/Layers/GlobalMeanPoolingLayer.cpp
     Dnn/Layers/GruLayer.cpp
@@ -54,11 +57,15 @@ target_sources( ${PROJECT_NAME} PRIVATE
     Dnn/Layers/ImageResizeLayer.cpp
     Dnn/Layers/LossLayer.cpp
     Dnn/Layers/LstmLayer.cpp
+    Dnn/Layers/MatrixMultiplicationLayer.cpp
     Dnn/Layers/MaxOverTimePoolingLayer.cpp
     Dnn/Layers/ModelWrapperLayer.cpp
     Dnn/Layers/MultichannleLookupLayer.cpp
+    Dnn/Layers/MultiheadAttentionLayer.cpp
     Dnn/Layers/MultiHingeLossLayer.cpp
+    Dnn/Layers/ObjectNormalizationLayer.cpp
     Dnn/Layers/PoolingLayer.cpp
+    Dnn/Layers/PositionalEmbeddingLayer.cpp
     Dnn/Layers/PrecisionRecallLayer.cpp
     Dnn/Layers/QualityControlLayer.cpp
     Dnn/Layers/RecurrentLayer.cpp
@@ -66,7 +73,9 @@ target_sources( ${PROJECT_NAME} PRIVATE
     Dnn/Layers/RepeatSequenceLayer.cpp
     Dnn/Layers/RleConvLayer.cpp
     Dnn/Layers/SequenceSumLayer.cpp
+    Dnn/Layers/SinkLayer.cpp
     Dnn/Layers/SoftmaxLayer.cpp
+    Dnn/Layers/SourceLayer.cpp
     Dnn/Layers/SplitLayer.cpp
     Dnn/Layers/SubSequenceLayer.cpp
     Dnn/Layers/TimeConvLayer.cpp
@@ -123,6 +132,7 @@ target_sources( ${PROJECT_NAME} PRIVATE
     TraditionalML/PlattScalling.cpp
     TraditionalML/ProblemWrappers.cpp
     TraditionalML/ProblemWrappers.h
+    TraditionalML/ProblemWrappers.inl
     TraditionalML/RegressionTreeModel.cpp
     TraditionalML/RegressionTreeModel.h
     TraditionalML/Score.cpp
@@ -160,7 +170,9 @@ target_sources( ${PROJECT_NAME} PRIVATE
     ../include/NeoML/Dnn/Layers/ArgmaxLayer.h
     ../include/NeoML/Dnn/Layers/AttentionLayer.h
     ../include/NeoML/Dnn/Layers/BackLinkLayer.h
+    ../include/NeoML/Dnn/Layers/BaseInPlaceLayer.h
     ../include/NeoML/Dnn/Layers/BatchNormalizationLayer.h
+    ../include/NeoML/Dnn/Layers/AddToObjectLayer.h
     ../include/NeoML/Dnn/Layers/BinaryFocalLossLayer.h
     ../include/NeoML/Dnn/Layers/CenterLossLayer.h
     ../include/NeoML/Dnn/Layers/ChannelwiseConvLayer.h
@@ -176,6 +188,7 @@ target_sources( ${PROJECT_NAME} PRIVATE
     ../include/NeoML/Dnn/Layers/FocalLossLayer.h
     ../include/NeoML/Dnn/Layers/FullyConnectedLayer.h
     ../include/NeoML/Dnn/Layers/FullyConnectedSourceLayer.h
+    ../include/NeoML/Dnn/Layers/GELULayer.h
     ../include/NeoML/Dnn/Layers/GlobalMaxPoolingLayer.h
     ../include/NeoML/Dnn/Layers/GlobalMeanPoolingLayer.h
     ../include/NeoML/Dnn/Layers/GruLayer.h
@@ -183,18 +196,24 @@ target_sources( ${PROJECT_NAME} PRIVATE
     ../include/NeoML/Dnn/Layers/ImageResizeLayer.h
     ../include/NeoML/Dnn/Layers/LossLayer.h
     ../include/NeoML/Dnn/Layers/LstmLayer.h
+    ../include/NeoML/Dnn/Layers/MatrixMultiplicationLayer.h
     ../include/NeoML/Dnn/Layers/MaxOverTimePoolingLayer.h
     ../include/NeoML/Dnn/Layers/ModelWrapperLayer.h
     ../include/NeoML/Dnn/Layers/MultichannelLookupLayer.h
+    ../include/NeoML/Dnn/Layers/MultiheadAttentionLayer.h
     ../include/NeoML/Dnn/Layers/MultiHingeLossLayer.h
+    ../include/NeoML/Dnn/Layers/ObjectNormalizationLayer.h
     ../include/NeoML/Dnn/Layers/PoolingLayer.h
+    ../include/NeoML/Dnn/Layers/PositionalEmbeddingLayer.h
     ../include/NeoML/Dnn/Layers/PrecisionRecallLayer.h
     ../include/NeoML/Dnn/Layers/QualityControlLayer.h
     ../include/NeoML/Dnn/Layers/RecurrentLayer.h
     ../include/NeoML/Dnn/Layers/ReorgLayer.h
     ../include/NeoML/Dnn/Layers/RepeatSequenceLayer.h
     ../include/NeoML/Dnn/Layers/SequenceSumLayer.h
+    ../include/NeoML/Dnn/Layers/SinkLayer.h
     ../include/NeoML/Dnn/Layers/SoftmaxLayer.h
+    ../include/NeoML/Dnn/Layers/SourceLayer.h
     ../include/NeoML/Dnn/Layers/SplitLayer.h
     ../include/NeoML/Dnn/Layers/SubSequenceLayer.h
     ../include/NeoML/Dnn/Layers/TimeConvLayer.h
@@ -253,6 +272,8 @@ target_include_directories(${PROJECT_NAME}
 if(USE_FINE_OBJECTS)
     target_link_libraries(${PROJECT_NAME} PRIVATE FineObjects)
 
+    target_compile_definitions(${PROJECT_NAME} PUBLIC NEOML_USE_FINEOBJ)
+
     set(MESSAGES_DIR ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.Messages)
     set(MESSAGES_SRC ${MESSAGES_DIR}/NeoMLMessages.cpp)
     add_custom_target(
@@ -291,9 +312,6 @@ endif()
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 
 add_subdirectory(../../NeoMathEngine ${CMAKE_BINARY_DIR}/NeoMathEngine)
-if(NOT USE_FINE_OBJECTS)
-    add_subdirectory(../../NeoOnnx ${CMAKE_BINARY_DIR}/NeoOnnx)
-endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE BUILD_NEOML)
 if(NOT NeoML_BUILD_SHARED)
@@ -311,26 +329,6 @@ endif()
 
 configure_target(${PROJECT_NAME})
 
-# Install
-if(NeoML_INSTALL)
-    if(USE_FINE_OBJECTS)
-        fine_unexport_symbols(${PROJECT_NAME})
-        fine_install(TARGETS NeoML NeoMathEngine)
-    else()
-        install(
-            TARGETS NeoML FineObjLite NeoMathEngine
-            EXPORT NeoMLConfig 
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
-
-        install(DIRECTORY ../include/NeoML DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-        install(EXPORT NeoMLConfig
-            NAMESPACE NeoML::
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
-        )
-    endif()
+if(USE_FINE_OBJECTS)
+    fine_unexport_symbols(${PROJECT_NAME})
 endif()
